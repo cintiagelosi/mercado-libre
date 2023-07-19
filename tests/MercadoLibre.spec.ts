@@ -6,11 +6,13 @@ const DATASET = JSON.parse(JSON.stringify(require('../utils/placeholder.json')))
 let poManager: POManager;
 let mlPage: MLPage;
 
+const URL = 'https://www.mercadolibre.com/';
+
 test.describe.configure({mode:'serial'});
 
 test.beforeEach(async ({page}) => {
   poManager = new POManager(page);   
-  await page.goto('https://www.mercadolibre.com/');
+  await page.goto(URL);
   await expect(page.locator('.ml-logo')).toContainText('MercadoLibre');   
   const LANDINGPAGE = poManager.getLandingPage();   
   await LANDINGPAGE.searchCountry(DATASET.country);
@@ -28,7 +30,7 @@ test(`Verify the title matches the product: ${DATASET.product}`, async({page})=>
 
 test('Verify the selected order is the right one', async({page})=>{
   let optionFilter = DATASET.optionFilterPrice;
-  await page.getByTestId('action:understood-button').click();
+  await mlPage.clickCookies(page);
   await mlPage.sortBy(optionFilter);
   let price1 = await page.locator('.ui-search-price .andes-money-amount__fraction').first().textContent();
   let price2 = await page.locator('.ui-search-price .andes-money-amount__fraction').last().textContent(); 
@@ -40,7 +42,7 @@ test('Verify the selected order is the right one', async({page})=>{
 });
 
 test('Verify a user cannot continue with the purchase if the user is not logged in', async({page})=>{
-  await page.getByTestId('action:understood-button').click();
+  await mlPage.clickCookies(page);
   await mlPage.sortBy(DATASET.optionFilterPrice);
   const SEARCHRESULTS = poManager.getSearchResults();
   await SEARCHRESULTS.addFilters();
